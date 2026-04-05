@@ -33,6 +33,16 @@ data class ActionButtonViewState(
     }
 }
 
+/**
+ * A custom button component that provides a styled action button based on the [ActionButtonViewState].
+ *
+ * This component supports different visual styles (PRIMARY and WARNING) and handles its
+ * own enabled/disabled state. It uses the design system's theme for colors, typography,
+ * and spacing.
+ *
+ * @param modifier The [Modifier] to be applied to the button.
+ * @param viewState The state object containing the action logic, label text, visual style, and enabled status.
+ */
 @Composable
 fun ActionButtonView(
     modifier: Modifier = Modifier,

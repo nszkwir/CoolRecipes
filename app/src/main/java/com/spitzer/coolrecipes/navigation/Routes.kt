@@ -12,6 +12,15 @@ import com.spitzer.ui.recipes.coordinator.RecipesListScreenRoute
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
+/**
+ * Creates a [SerializersModule] configured for polymorphic serialization of [NavKey] subclasses.
+ *
+ * This module registers all application-specific navigation routes, including coordinators
+ * and individual screens for Recipes, Favorites, and Settings modules. This is required
+ * for the navigation system to correctly serialize and deserialize navigation states.
+ *
+ * @return A configured [SerializersModule] containing all route subclass registrations.
+ */
 fun getRouteSerializersModule() = SerializersModule {
     polymorphic(NavKey::class) {
 

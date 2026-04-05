@@ -13,6 +13,15 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 
+/**
+ * A composable that displays and manages a Lottie animation.
+ *
+ * @param animation The raw resource ID of the Lottie JSON animation.
+ * @param modifier The [Modifier] to be applied to the Lottie animation layout.
+ * @param shouldLoop Whether the animation should repeat indefinitely. Defaults to false.
+ * @param onAnimationFinishedPlaying An optional callback invoked when the animation finishes playing.
+ * This is only triggered if [shouldLoop] is false and the progress reaches 100%.
+ */
 @Composable
 fun LottieAnimationView(
     @RawRes animation: Int,

@@ -14,12 +14,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,8 +38,6 @@ import com.spitzer.designsystem.theme.Spacing
 import com.spitzer.domain.model.recipe.RecipeSearchCriteria
 import com.spitzer.domain.model.recipe.RecipeSortCriteria
 import com.spitzer.domain.model.recipe.RecipeSortOrder
-
-import androidx.compose.runtime.Immutable
 
 @Immutable
 data class RecipeListBottomSheetViewState(
@@ -79,6 +76,21 @@ private fun mapSortOrderTitle(recipeSortOrder: RecipeSortOrder): String {
     }
 }
 
+/**
+ * A bottom sheet composable that provides filtering and sorting options for the recipe list.
+ *
+ * This view allows users to select search criteria (e.g., by name or ingredients),
+ * sort criteria (e.g., relevance, popularity), and the sort order (ascending or descending).
+ * It also includes actions to clear the selection or confirm the changes.
+ *
+ * @param viewState The current state of the bottom sheet, including available options and selections.
+ * @param onSearchCriteriaSelected Callback triggered when a search criterion is selected.
+ * @param onSortCriteriaSelected Callback triggered when a sort criterion is selected.
+ * @param onSortOrderSelected Callback triggered when a sort order is selected.
+ * @param onDismiss Callback triggered when the bottom sheet is dismissed by the user.
+ * @param onClear Callback triggered when the "Clear" action is clicked.
+ * @param onConfirm Callback triggered when the "Confirm" action is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeListBottomSheetView(
@@ -90,13 +102,6 @@ fun RecipeListBottomSheetView(
     onClear: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
-    var skipPartiallyExpanded by rememberSaveable { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    val bottomSheetState =
-        rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
-
-    // ---------
     val density = LocalDensity.current
     var isHiding by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -108,7 +113,9 @@ fun RecipeListBottomSheetView(
         }
     }
 
-    if (sheetState.currentValue == SheetValue.Hidden && sheetState.targetValue == SheetValue.Hidden && isHiding) {
+    if (sheetState.currentValue == SheetValue.Hidden &&
+        sheetState.targetValue == SheetValue.Hidden && isHiding
+    ) {
         onDismiss()
     }
 

@@ -128,9 +128,16 @@ class RecipeDetailsScreenViewModel @AssistedInject constructor(
         }
     }
 
+    /**
+     * Loads the recipe details for the specific recipe ID provided in the input.
+     *
+     * This function triggers the loading state, fetches recipe data via [getRecipeByIdUseCase],
+     * and handles the response by either updating the view state with recipe information
+     * or displaying appropriate error messages (e.g., no internet or unknown errors).
+     * Finally, it hides the loading animation once the process is complete.
+     */
     private fun loadRecipeDetails() {
         showLoadingAnimation()
-
         viewModelScope.launch {
             when (val result = getRecipeByIdUseCase(input.recipeId)) {
                 RecipeDetailsResult.NoInternet -> {
@@ -145,15 +152,19 @@ class RecipeDetailsScreenViewModel @AssistedInject constructor(
                     inputChanged(recipeDetails = result.recipeDetails)
                 }
             }
-
             hideLoadingAnimation()
         }
     }
 
+    /**
+     * Refreshes the recipe details by fetching the latest data from the remote source.
+     *
+     * This function displays a loading animation and executes the [refreshRecipeDetailsByIdUseCase].
+     * Based on the result, it either updates the view state with the new details or
+     * displays an appropriate error message (e.g., no internet or unknown error).
+     */
     private fun refreshRecipeDetails() {
-
         showLoadingAnimation()
-
         viewModelScope.launch {
             when (val result = refreshRecipeDetailsByIdUseCase(input.recipeId)) {
                 RecipeDetailsResult.NoInternet -> {

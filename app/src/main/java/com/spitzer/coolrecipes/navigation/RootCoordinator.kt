@@ -26,6 +26,15 @@ import com.spitzer.ui.recipes.coordinator.FavoritesCoordinatorRoute
 import com.spitzer.ui.recipes.coordinator.RecipesCoordinator
 import com.spitzer.ui.recipes.coordinator.RecipesCoordinatorRoute
 
+/**
+ * The main entry point for the application's navigation and layout structure.
+ *
+ * This coordinator manages the top-level navigation state, including the global [Scaffold]
+ * which hosts the [MyTopAppBar] and [MyNavigationBar]. It handles the switching between
+ * primary application sections: Recipes, Favorites, and Settings.
+ *
+ * @param modifier The [Modifier] to be applied to the root [Scaffold].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootCoordinator(

@@ -6,6 +6,9 @@ import com.spitzer.domain.repository.RecipeRepository
 import com.spitzer.domain.usecase.recipe.result.RecipePaginationResult
 import javax.inject.Inject
 
+/**
+ * Use case responsible for fetching the next page of recipes based on the current scroll position
+ */
 class FetchNextRecipePageWhenNeededUseCase @Inject constructor(
     private val repository: RecipeRepository
 ) {

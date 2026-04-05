@@ -29,6 +29,12 @@ data class PillViewState(
     val onSelectionChange: (Boolean) -> Unit
 )
 
+/**
+ * A selectable pill-shaped button component used for filters or category selection.
+ *
+ * @param modifier The [Modifier] to be applied to the component.
+ * @param viewState The state object containing the text to display, selection status, and click callback.
+ */
 @Composable
 fun PillView(
     modifier: Modifier = Modifier,

@@ -9,6 +9,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+ * Applies a highly customizable shadow effect to a [Modifier].
+ *
+ * This extension allows for fine-grained control over shadow properties
+ */
 fun Modifier.customShadow(
     color: Color = Color.Black,
     alpha: Float = 1f,

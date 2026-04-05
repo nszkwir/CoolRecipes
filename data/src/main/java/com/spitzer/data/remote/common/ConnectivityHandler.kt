@@ -12,6 +12,12 @@ internal interface ConnectivityHandler {
     fun hasInternetConnection(): Boolean
 }
 
+/**
+ * Default implementation of [ConnectivityHandler] that utilizes [ConnectivityManager]
+ * to determine the current network status of the device.
+ *
+ * @property applicationContext The application context used to retrieve the system connectivity service.
+ */
 internal class ConnectivityHandlerImpl @Inject constructor(
     @param:ApplicationContext private val applicationContext: Context
 ) : ConnectivityHandler {

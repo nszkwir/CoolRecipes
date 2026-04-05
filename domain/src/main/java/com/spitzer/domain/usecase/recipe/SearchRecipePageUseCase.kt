@@ -7,6 +7,14 @@ import com.spitzer.domain.repository.RecipeRepository
 import com.spitzer.domain.usecase.recipe.result.SearchRecipeResult
 import javax.inject.Inject
 
+/**
+ * Use case responsible for searching recipes based on specific search and sort criteria.
+ *
+ * This use case interacts with the [RecipeRepository] to fetch a list of recipes that
+ * match the provided query and filters.
+ *
+ * @property repository The repository used to perform the recipe search operation.
+ */
 class SearchRecipePageUseCase @Inject constructor(
     private val repository: RecipeRepository
 ) {

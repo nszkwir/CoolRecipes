@@ -34,6 +34,15 @@ data class MessageViewState(
     val secondaryButton: ActionButtonViewState? = null
 )
 
+/**
+ * A full-screen informational view used to display messages, errors, or empty states.
+ *
+ * This component displays a descriptive subtitle, a Lottie animation for visual feedback,
+ * and up to two action buttons (primary and optional secondary) positioned at the bottom.
+ *
+ * @param modifier The [Modifier] to be applied to the layout.
+ * @param viewState The state object containing the subtitle text, animation resource, and button configurations.
+ */
 @Composable
 fun MessageView(
     modifier: Modifier = Modifier,

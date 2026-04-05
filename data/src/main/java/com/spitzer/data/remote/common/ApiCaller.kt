@@ -17,6 +17,18 @@ internal interface ApiCaller {
     ): ApiResult<T>
 }
 
+/**
+ * Implementation of [ApiCaller] that provides a robust wrapper for executing network requests.
+ *
+ * This class handles:
+ * - Internet connectivity checks before initiating requests via [ConnectivityHandler].
+ * - Exception handling for common network issues (e.g., [ConnectException]).
+ * - Transformation of Retrofit [Response] objects into a structured [ApiResult].
+ * - Support for optional empty response bodies.
+ *
+ * @property applicationContext The Android [Context] used within the implementation.
+ * @property connectivityHandler Utility used to verify the current network status.
+ */
 internal data class ApiCallerImpl @Inject constructor(
     @param:ApplicationContext private val applicationContext: Context,
     private val connectivityHandler: ConnectivityHandler

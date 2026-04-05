@@ -9,9 +9,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.spitzer.designsystem.R
 import com.spitzer.designsystem.animations.LottieAnimationView
+import com.spitzer.designsystem.theme.CoolRecipesTheme
 
+/**
+ * A full-screen loading component that displays a centered Lottie animation.
+ *
+ * This view uses a transparent background and centers a specific loading animation
+ * (R.raw.loading) within the provided [modifier] constraints.
+ *
+ * @param modifier The [Modifier] to be applied to the loading container.
+ */
 @Composable
 fun LoadingView(
     modifier: Modifier = Modifier
@@ -27,5 +37,13 @@ fun LoadingView(
             animation = R.raw.loading,
             shouldLoop = true
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoadingViewPreview() {
+    CoolRecipesTheme {
+        LoadingView()
     }
 }

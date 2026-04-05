@@ -51,6 +51,17 @@ sealed interface RecipeCardViewState {
     ) : RecipeCardViewState
 }
 
+/**
+ * A composable that displays a recipe in a card format, supporting both a content state
+ * and a loading shimmer state.
+ *
+ * In the [RecipeCardViewState.Content] state, it displays a top image (or a placeholder animation),
+ * a primary title, and a secondary title which supports HTML formatting. The entire card
+ * is clickable based on the provided [RecipeCardViewState.Content.onTap] action.
+ *
+ * @param modifier The modifier to be applied to the card container.
+ * @param viewState The state representing whether to show the recipe details or a loading placeholder.
+ */
 @Composable
 fun RecipeCardView(
     modifier: Modifier = Modifier,

@@ -2,6 +2,7 @@ package com.spitzer.domain.usecase.recipe
 
 import com.spitzer.domain.model.recipe.Recipe
 import com.spitzer.domain.repository.RecipeRepository
+import com.spitzer.domain.usecase.favorites.GetFavoriteRecipesUseCase
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

@@ -82,6 +82,21 @@ private data class RectInfo(
     val height: Float
 )
 
+/**
+ * A composable that displays a search bar with an expanding container transformation for the recipe list.
+ *
+ * When activated, the search bar expands to fill the screen and displays a list of search results
+ * based on the current [viewState]. It handles different states such as loading, empty results,
+ * and populated recipe lists, while providing a funnel/filter option.
+ *
+ * @param modifier The [Modifier] to be applied to the search field.
+ * @param viewState The current state of the search bar, including query, results, and active status.
+ * @param onRecipeCardClicked Callback invoked when a recipe from the result list is tapped.
+ * @param onFunnelTap Optional callback for when the filter/funnel icon is clicked.
+ * @param onQueryChange Callback invoked when the user types in the search field.
+ * @param onOpenSearch Callback invoked when the search field is activated (clicked to expand).
+ * @param onCloseSearch Callback invoked when the search is dismissed or closed.
+ */
 @Composable
 fun RecipeListScreenSearchBarView(
     modifier: Modifier = Modifier,
@@ -214,6 +229,27 @@ fun RecipeListScreenSearchBarView(
     }
 }
 
+/**
+ * A private internal composable that renders the visual search input field.
+ *
+ * This component manages the text input state, focus requests when activated,
+ * and handles the display of leading search/close icons and the optional filter (funnel) icon.
+ * It also reports its layout coordinates via [onPositioned] to support the container
+ * transform animation in the parent view.
+ *
+ * @param modifier The [Modifier] to be applied to the search field container.
+ * @param query The current text value typed into the search field.
+ * @param hint The placeholder text to display when the field is empty and inactive.
+ * @param isActive Whether the search field is currently in its expanded/active state.
+ * @param isFunnelOn Whether the filter/funnel is currently active (used to toggle the animation).
+ * @param isFunnelEnabled Whether the filter/funnel icon should be visible at all.
+ * @param onQueryChange Callback invoked when the user modifies the text in the [BasicTextField].
+ * @param onActivate Callback invoked when the user taps the field to begin searching.
+ * @param onDeactivate Callback invoked when the user taps the close icon or field to stop searching.
+ * @param onFunnelTap Optional callback invoked when the filter/funnel icon is clicked.
+ * @param onPositioned Callback that returns the [RectInfo] (position and size) of this field
+ * in window coordinates.
+ */
 @Composable
 private fun RecipeSearchField(
     modifier: Modifier = Modifier,

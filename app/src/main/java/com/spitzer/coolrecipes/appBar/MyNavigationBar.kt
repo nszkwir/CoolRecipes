@@ -17,6 +17,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation3.runtime.NavKey
 import com.spitzer.designsystem.R
 import com.spitzer.designsystem.theme.CoolRecipesTheme
@@ -39,6 +40,15 @@ val bottomNavItemsDefault = mapOf<NavKey, BottomNavItem>(
     SettingsCoordinatorRoute to BottomNavItem(R.drawable.baseline_settings_24, R.string.Settings),
 )
 
+/**
+ * A custom bottom navigation bar that displays a list of navigation items based on the provided map.
+ *
+ * @param modifier The [Modifier] to be applied to the [BottomAppBar].
+ * @param selectedKey The [NavKey] representing the currently active or selected navigation item.
+ * @param onItemSelected A callback triggered when a navigation item is clicked, providing the associated [NavKey].
+ * @param items A map associating [NavKey] identifiers with [BottomNavItem] data (icons and labels).
+ * Defaults to [bottomNavItemsDefault].
+ */
 @Composable
 fun MyNavigationBar(
     modifier: Modifier = Modifier,
@@ -82,5 +92,16 @@ fun MyNavigationBar(
                 }
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MyNavigationBarPreview() {
+    CoolRecipesTheme {
+        MyNavigationBar(
+            selectedKey = RecipesCoordinatorRoute,
+            onItemSelected = {}
+        )
     }
 }

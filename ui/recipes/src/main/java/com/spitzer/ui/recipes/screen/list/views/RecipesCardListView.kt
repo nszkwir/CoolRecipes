@@ -24,6 +24,18 @@ import com.spitzer.designsystem.theme.Spacing
 import com.spitzer.domain.model.recipe.Recipe
 import kotlinx.coroutines.flow.collectLatest
 
+/**
+ * A composable that displays a scrollable list of recipe cards.
+ *
+ * This component utilizes a [LazyColumn] to efficiently render a list of recipes based on the
+ * provided [cardListViewStates]. It also includes a prefetching mechanism to notify when the
+ * user scrolls near the end of the list, facilitating pagination or infinite scrolling.
+ *
+ * @param modifier The [Modifier] to be applied to the layout.
+ * @param cardListViewStates The list of view states representing each recipe card (e.g., content or loading states).
+ * @param onPrefetchItemsAtIndex An optional callback triggered with the index of the last visible item,
+ * used to request more data as the user scrolls.
+ */
 @Composable
 fun RecipesCardListView(
     modifier: Modifier = Modifier,
@@ -58,6 +70,17 @@ fun RecipesCardListView(
     }
 }
 
+/**
+ * Maps a list of [Recipe] domain models to a list of [RecipeCardViewState] objects.
+ *
+ * This function transforms the raw recipe data into a format suitable for the UI, handling
+ * both valid recipe content and null values (which are mapped to a loading state).
+ *
+ * @param recipeList The list of [Recipe] objects to be mapped. Null elements in the list
+ * represent items currently in a loading state.
+ * @param onCardClicked A callback triggered when a recipe card is tapped, passing the selected [Recipe].
+ * @return A list of [RecipeCardViewState] containing either content or loading states.
+ */
 @Composable
 fun mapCardListViewStates(
     recipeList: List<Recipe?>,

@@ -17,6 +17,12 @@ import com.spitzer.designsystem.R.raw.search_not_found
 import com.spitzer.designsystem.animations.LottieAnimationView
 import com.spitzer.designsystem.theme.CoolRecipesTheme
 
+/**
+ * A composable that displays a placeholder view when a search returns no results.
+ * It features a Lottie animation to visually indicate the empty state and supports vertical scrolling.
+ *
+ * @param modifier The [Modifier] to be applied to the layout.
+ */
 @Composable
 fun EmptySearchView(
     modifier: Modifier = Modifier

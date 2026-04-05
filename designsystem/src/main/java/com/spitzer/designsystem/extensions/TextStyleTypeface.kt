@@ -10,6 +10,16 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontSynthesis
 import androidx.compose.ui.text.font.FontWeight
 
+/**
+ * Converts this [TextStyle] into a native Android [Typeface].
+ *
+ * This function utilizes the [LocalFontFamilyResolver] to resolve the typeface based on the
+ * [fontFamily], [fontStyle], and [fontSynthesis] defined in the [TextStyle].
+ *
+ * @param fontWeight An optional [FontWeight] to override the weight defined in this [TextStyle].
+ * If null, it defaults to the weight defined in the style, or [FontWeight.Normal] if unspecified.
+ * @return The resolved [Typeface] instance.
+ */
 @Composable
 fun TextStyle.toTypeface(fontWeight: FontWeight? = null): Typeface {
     val resolver: FontFamily.Resolver = LocalFontFamilyResolver.current

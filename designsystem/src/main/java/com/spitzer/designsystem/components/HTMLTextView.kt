@@ -26,6 +26,20 @@ import com.spitzer.designsystem.extensions.toTypeface
 import com.spitzer.designsystem.theme.CoolRecipesTheme
 import com.spitzer.designsystem.theme.Spacing
 
+/**
+ * A Composable that displays HTML-formatted text using a native Android [TextView].
+ *
+ * This component bridges the gap between Compose and Android's [HtmlCompat], allowing for
+ * the rendering of basic HTML tags (like `<b>`, `<i>`, `<u>`, etc.) while maintaining
+ * styling consistency with the Compose Design System.
+ *
+ * @param modifier The [Modifier] to be applied to the layout.
+ * @param text The HTML string to be rendered.
+ * @param color The color of the text.
+ * @param style The [TextStyle] to be applied (font size, letter spacing, etc.).
+ * @param fontWeight Optional [FontWeight] to override the weight defined in the [style].
+ * @param maxLines The maximum number of lines to display. Defaults to [Integer.MAX_VALUE].
+ */
 @Composable
 fun HTMLTextView(
     modifier: Modifier = Modifier,

@@ -60,6 +60,18 @@ data class RecipeDetailsViewState(
     val ingredients: List<String>? = null
 )
 
+/**
+ * A Composable that displays the comprehensive details of a recipe.
+ *
+ * This view is divided into two main parts:
+ * 1. A top section featuring the recipe image or a placeholder animation.
+ * 2. A bottom section containing the recipe title, dietary information (calories, servings, etc.),
+ *    summary, ingredients list, cooking instructions, and a source link.
+ *
+ * @param modifier The [Modifier] to be applied to the root layout of this view.
+ * @param viewState The state object containing all the data required to render the recipe details.
+ * @param onFavoriteTapped A callback invoked when the user taps the favorite/heart icon.
+ */
 @Composable
 fun RecipeDetailsView(
     modifier: Modifier = Modifier,

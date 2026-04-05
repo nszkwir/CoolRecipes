@@ -18,6 +18,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import com.spitzer.designsystem.R
 import com.spitzer.designsystem.theme.CoolRecipesTheme
 import com.spitzer.designsystem.theme.Spacing
 
@@ -34,6 +36,15 @@ data class MyTopAppBarViewState(
 )
 
 
+/**
+ * A custom centered top app bar component for the CoolRecipes application.
+ *
+ * This composable wraps a [CenterAlignedTopAppBar] and configures it using the provided [viewState],
+ * supporting a centered title and optional navigation or action icons on the left and right.
+ *
+ * @param modifier The [Modifier] to be applied to this top app bar.
+ * @param viewState The [MyTopAppBarViewState] containing the configuration for the title and navigation items.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopAppBar(
@@ -88,4 +99,26 @@ fun MyTopAppBar(
             containerColor = CoolRecipesTheme.colors.n99n00
         )
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MyTopAppBarPreview() {
+    CoolRecipesTheme {
+        MyTopAppBar(
+            viewState = MyTopAppBarViewState(
+                title = "Cool Recipes",
+                leftNavItem = TopNavItem(
+                    icon = R.drawable.baseline_home_24,
+                    name = R.string.recipe_list_screen_title,
+                    onClick = {}
+                ),
+                rightNavItem = TopNavItem(
+                    icon = R.drawable.baseline_settings_24,
+                    name = R.string.Settings,
+                    onClick = {}
+                )
+            )
+        )
+    }
 }

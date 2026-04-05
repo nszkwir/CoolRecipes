@@ -94,6 +94,12 @@ class RecipeListScreenViewModel @Inject constructor(
         refreshRecipeList()
     }
 
+    /**
+     * Updates the view state with the list of recipes contained within the provided [recipePage].
+     * This method is called whenever the underlying recipe data source emits a new page.
+     *
+     * @param recipePage The [RecipePage] containing the updated list of recipes to be displayed.
+     */
     private fun inputChanged(recipePage: RecipePage) {
         _viewState.update { currentState ->
             currentState.copy(
@@ -102,7 +108,11 @@ class RecipeListScreenViewModel @Inject constructor(
         }
     }
 
-    // Used to provide dynamically the proper function to the Error Message primary button
+    /**
+     * Holds a reference to the action that failed most recently.
+     * This allows the UI to dynamically assign the correct retry logic to the
+     * primary button of an error message or dialog.
+     */
     private var lastFailedAction: (() -> Unit)? = null
 
     fun onFunnelTap() {
@@ -266,6 +276,19 @@ class RecipeListScreenViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Executes a recipe search based on the current query and filter criteria.
+     *
+     * The search is only triggered if the query length is greater than 2 characters.
+     * It manages search state by:
+     * 1. Showing a loading animation.
+     * 2. Cancelling any existing search jobs to prevent race conditions.
+     * 3. Launching a new coroutine to fetch data via [searchRecipeListUseCase].
+     * 4. Handling result states: updating the UI on success or showing error messages
+     *    (No Internet/Unknown) with retry logic.
+     *
+     * If the query is empty, it clears the current search results and cancels pending jobs.
+     */
     private fun searchRecipeList() {
         val query = _viewState.value.searchBarViewState.query
 
@@ -326,6 +349,18 @@ class RecipeListScreenViewModel @Inject constructor(
         output(RecipeListScreenViewModelOutput.RecipeDetail(recipe.id))
     }
 
+    /**
+     * Refreshes the recipe list by fetching the first page of results from the server
+     * using the current sort criteria and order defined in the bottom sheet state.
+     *
+     * This function performs the following steps:
+     * 1. Displays a loading animation.
+     * 2. Synchronizes the last used search criteria with the current UI state.
+     * 3. Executes the [refreshRecipeListUseCase] within the [viewModelScope].
+     * 4. Hides the loading animation upon completion.
+     * 5. Handles errors (No Internet or Generic) by showing an error message if the
+     *    existing recipe list is empty, providing a retry mechanism that calls this function again.
+     */
     fun refreshRecipeList() {
         showLoadingAnimation()
         updateLastSearchCriteria()
@@ -365,6 +400,16 @@ class RecipeListScreenViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Fetches the next page of recipes based on the current scroll position.
+     *
+     * This function is typically called when the user scrolls through the list. It triggers
+     * a request to load more data only when the [elementIndex] indicates that the end of
+     * the current list is being approached.
+     *
+     * @param elementIndex The index of the item currently being rendered or accessed in the list,
+     * used to determine if a new page should be fetched.
+     */
     fun getRecipeList(elementIndex: Int) {
         retryJob?.cancel()
         viewModelScope.launch {

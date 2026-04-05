@@ -17,6 +17,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.IntSize
 
+/**
+ * Adds an animated shimmer effect to the [Modifier], typically used for skeleton loading states.
+ *
+ * The effect uses a linear gradient that slides horizontally across the component's background,
+ * creating a shimmering motion.
+ *
+ * @param colors The list of colors used to create the shimmer gradient. Defaults to a
+ * dark theme-friendly color palette.
+ * @return A [Modifier] with the animated shimmer background applied.
+ */
 fun Modifier.shimmerEffect(
     colors: List<Color> = listOf(
         Color(0x4D181818),

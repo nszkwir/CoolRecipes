@@ -10,6 +10,18 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+
+/**
+ * Core [ViewModel] for the application responsible for managing global state
+ * and performing initial data synchronization.
+ *
+ * This ViewModel handles application-wide preferences such as the theme settings
+ * and ensures that the [RecipeRepository] is initialized when the app starts.
+ *
+ * @property settingsRepository Repository for accessing and managing user settings.
+ * @property recipeRepository Repository for accessing and initializing recipe data.
+ */
 @HiltViewModel
 class AppViewModel @Inject constructor(
     settingsRepository: SettingsRepository,

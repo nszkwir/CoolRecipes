@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.spitzer.domain.model.recipe.Recipe
 import com.spitzer.domain.model.recipe.RecipeSearchCriteria
-import com.spitzer.domain.usecase.recipe.GetFavoriteRecipesUseCase
+import com.spitzer.domain.usecase.favorites.GetFavoriteRecipesUseCase
 import com.spitzer.ui.recipes.screen.list.views.RecipeListScreenSearchBarViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +52,11 @@ class FavoriteRecipesViewModel @Inject constructor(
     }
 
     init {
+        /**
+         * Observes the stream of favorite recipes from the data source and combines it with the current
+         * search query. It filters the recipe list based on the search criteria and updates the
+         * [_viewState] to reflect the current data and loading status.
+         */
         viewModelScope.launch {
             // Combine the favorite recipes flow from DB with our local search query
             combine(
@@ -124,8 +129,8 @@ class FavoriteRecipesViewModel @Inject constructor(
     fun refreshFavorites() {
         _viewState.update { it.copy(isLoading = false) }
     }
-    
+
     fun onMessagePrimaryButtonClicked() {}
-    
+
     fun onMessageSecondaryButtonClicked() {}
 }

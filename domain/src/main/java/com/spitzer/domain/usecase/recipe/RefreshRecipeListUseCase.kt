@@ -6,6 +6,10 @@ import com.spitzer.domain.repository.RecipeRepository
 import com.spitzer.domain.usecase.recipe.result.RecipePaginationResult
 import javax.inject.Inject
 
+/**
+ * Use case for refreshing the recipe list with specific sorting options.
+ *
+ */
 class RefreshRecipeListUseCase @Inject constructor(
     private val repository: RecipeRepository
 ) {

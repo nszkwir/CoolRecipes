@@ -1,7 +1,7 @@
 package com.spitzer.ui.recipes.screen.favorites
 
 import com.spitzer.domain.model.recipe.Recipe
-import com.spitzer.domain.usecase.recipe.GetFavoriteRecipesUseCase
+import com.spitzer.domain.usecase.favorites.GetFavoriteRecipesUseCase
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers

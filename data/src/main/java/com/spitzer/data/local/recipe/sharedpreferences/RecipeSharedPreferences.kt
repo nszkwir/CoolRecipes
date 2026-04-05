@@ -11,6 +11,15 @@ interface RecipeSharedPreferences {
     fun clearRecipeListTotalResults()
 }
 
+/**
+ * Implementation of [RecipeSharedPreferences] that uses Android's [SharedPreferences]
+ * to persist recipe-related metadata locally.
+ *
+ * This class handles the storage and retrieval of values such as the total results
+ * count for recipe queries, ensuring data persistence across app sessions.
+ *
+ * @property context The application context used to initialize the SharedPreferences instance.
+ */
 class RecipeSharedPreferencesImpl @Inject constructor(
     @ApplicationContext context: Context
 ) : RecipeSharedPreferences {

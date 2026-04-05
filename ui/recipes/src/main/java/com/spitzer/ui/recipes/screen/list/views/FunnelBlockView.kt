@@ -14,6 +14,13 @@ import com.spitzer.designsystem.components.PillViewState
 import com.spitzer.designsystem.theme.CoolRecipesTheme
 import com.spitzer.designsystem.theme.Spacing
 
+/**
+ * A composable that displays a titled section containing a horizontal row of selectable pills.
+ *
+ * @param modifier The [Modifier] to be applied to the root layout.
+ * @param title The header text displayed above the horizontal list.
+ * @param pillsViewStates A list of [PillViewState] objects representing the state and behavior of each pill.
+ */
 @Composable
 fun FunnelBlockView(
     modifier: Modifier = Modifier,
