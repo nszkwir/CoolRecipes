@@ -260,11 +260,30 @@ class RecipeDetailsScreenViewModelTest {
     }
 
     @Test
-    fun `onMessageSecondaryButtonClicked calls output ScreenNavigateBack`() = runTest(testDispatcher) {
+    fun `onMessageSecondaryButtonClicked only dismisses message when details are already loaded`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
         var outputResult: RecipeDetailsScreenViewModelOutput? = null
         viewModel.output = { outputResult = it }
         advanceUntilIdle()
+
+        // Manually trigger an error state
+        viewModel.showGenericError()
+        assertNotNull(viewModel.viewState.value.message)
+
+        viewModel.onMessageSecondaryButtonClicked()
+
+        assertNull(viewModel.viewState.value.message)
+        assertNull(outputResult)
+    }
+
+    @Test
+    fun `onMessageSecondaryButtonClicked navigates back when no details are loaded`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(getResult = RecipeDetailsResult.NoInternet)
+        var outputResult: RecipeDetailsScreenViewModelOutput? = null
+        viewModel.output = { outputResult = it }
+        advanceUntilIdle()
+
+        assertNotNull(viewModel.viewState.value.message)
 
         viewModel.onMessageSecondaryButtonClicked()
 

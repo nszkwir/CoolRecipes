@@ -102,7 +102,11 @@ class RecipeDetailsScreenViewModel @AssistedInject constructor(
     }
 
     fun onMessageSecondaryButtonClicked() {
-        output(RecipeDetailsScreenViewModelOutput.ScreenNavigateBack)
+        if (_viewState.value.recipeDetails != null) {
+            removeErrorView()
+        } else {
+            output(RecipeDetailsScreenViewModelOutput.ScreenNavigateBack)
+        }
     }
 
     private fun inputChanged(recipeDetails: RecipeDetails) {

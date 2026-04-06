@@ -18,7 +18,9 @@ data class RecipeListScreenViewState(
     val isLoading: Boolean,
     val searchBarViewState: RecipeListScreenSearchBarViewState,
     val bottomSheetViewState: RecipeListBottomSheetViewState,
-    val message: Message?
+    val message: Message?,
+    val hasInternetConnection: Boolean = true,
+    val toastMessage: Int? = null
 ) {
     @Immutable
     data class Message(

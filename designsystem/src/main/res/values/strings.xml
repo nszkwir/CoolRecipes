@@ -48,4 +48,7 @@
     <string name="recipe_details_screen_remove_from_favorites">Remove from favorites</string>
 
     <string name="recipe_card_view_recipe_image">Recipe Image</string>
+
+    <string name="toast_message_no_internet">No internet connection</string>
+    <string name="toast_message_generic_error">Opps something went wrong</string>
 </resources>

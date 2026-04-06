@@ -5,6 +5,8 @@ import com.spitzer.domain.model.recipe.RecipePage
 import com.spitzer.domain.model.recipe.RecipeSearchCriteria
 import com.spitzer.domain.model.recipe.RecipeSortCriteria
 import com.spitzer.domain.model.recipe.RecipeSortOrder
+import com.spitzer.designsystem.R as dsR
+import com.spitzer.domain.usecase.connectivity.ObserveConnectivityUseCase
 import com.spitzer.domain.usecase.recipe.FetchNextRecipePageWhenNeededUseCase
 import com.spitzer.domain.usecase.recipe.GetRecipeListUseCase
 import com.spitzer.domain.usecase.recipe.RefreshRecipeListUseCase
@@ -41,8 +43,10 @@ class RecipeListScreenViewModelTest {
     private val refreshRecipeListUseCase: RefreshRecipeListUseCase = mockk()
     private val fetchNextRecipePageWhenNeededUseCase: FetchNextRecipePageWhenNeededUseCase = mockk()
     private val searchRecipeListUseCase: SearchRecipePageUseCase = mockk()
+    private val observeConnectivityUseCase: ObserveConnectivityUseCase = mockk()
 
     private val recipePageFlow = MutableStateFlow(RecipePage(list = emptyList(), totalResults = 0))
+    private val connectivityFlow = MutableStateFlow(true)
 
     private val sampleRecipe = Recipe(
         id = 1L,
@@ -58,6 +62,7 @@ class RecipeListScreenViewModelTest {
         coEvery {
             refreshRecipeListUseCase(any(), any())
         } returns RecipePaginationResult.Success
+        every { observeConnectivityUseCase() } returns connectivityFlow
     }
 
     @After
@@ -70,27 +75,28 @@ class RecipeListScreenViewModelTest {
             getRecipeListUseCase = getRecipeListUseCase,
             refreshRecipeListUseCase = refreshRecipeListUseCase,
             fetchNextRecipePageWhenNeededUseCase = fetchNextRecipePageWhenNeededUseCase,
-            searchRecipeListUseCase = searchRecipeListUseCase
+            searchRecipeListUseCase = searchRecipeListUseCase,
+            observeConnectivityUseCase = observeConnectivityUseCase
         )
     }
 
     @Test
-    fun `initial state has isLoading true and empty list`() = runTest(testDispatcher) {
+    fun `initial state has isLoading false and empty list`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
-        assertTrue(viewModel.viewState.value.isLoading)
+        assertFalse(viewModel.viewState.value.isLoading)
         assertTrue(viewModel.viewState.value.recipeList.isEmpty())
     }
 
     @Test
-    fun `init calls refreshRecipeList and collects recipe page`() = runTest(testDispatcher) {
+    fun `init collects recipe page and does NOT call refreshRecipeList`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        coVerify {
+        coVerify(exactly = 0) {
             refreshRecipeListUseCase(
-                sortCriteria = RecipeSortCriteria.RELEVANCE,
-                sortOrder = RecipeSortOrder.DESCENDING
+                any(),
+                any()
             )
         }
     }
@@ -120,11 +126,12 @@ class RecipeListScreenViewModelTest {
     }
 
     @Test
-    fun `refreshRecipeList NoInternet shows error when list is empty`() = runTest(testDispatcher) {
+    fun `refreshRecipeList NoInternet shows error message`() = runTest(testDispatcher) {
         coEvery {
             refreshRecipeListUseCase(any(), any())
         } returns RecipePaginationResult.NoInternet
         val viewModel = createViewModel()
+        viewModel.refreshRecipeList()
         advanceUntilIdle()
 
         assertNotNull(viewModel.viewState.value.message)
@@ -135,11 +142,12 @@ class RecipeListScreenViewModelTest {
     }
 
     @Test
-    fun `refreshRecipeList Unknown shows generic error when list is empty`() = runTest(testDispatcher) {
+    fun `refreshRecipeList Unknown shows generic error message`() = runTest(testDispatcher) {
         coEvery {
             refreshRecipeListUseCase(any(), any())
         } returns RecipePaginationResult.Unknown
         val viewModel = createViewModel()
+        viewModel.refreshRecipeList()
         advanceUntilIdle()
 
         assertNotNull(viewModel.viewState.value.message)
@@ -150,12 +158,12 @@ class RecipeListScreenViewModelTest {
     }
 
     @Test
-    fun `refreshRecipeList NoInternet does not show error when list has items`() = runTest(testDispatcher) {
-        // Create viewModel with default (Success) refresh so init completes
+    fun `refreshRecipeList NoInternet shows error even when list has items`() = runTest(testDispatcher) {
+        // Create viewModel
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        // Now populate the list via the flow
+        // Populate the list via the flow
         recipePageFlow.value = RecipePage(list = listOf(sampleRecipe), totalResults = 1)
         advanceUntilIdle()
 
@@ -166,7 +174,11 @@ class RecipeListScreenViewModelTest {
         viewModel.refreshRecipeList()
         advanceUntilIdle()
 
-        assertNull(viewModel.viewState.value.message)
+        assertNotNull(viewModel.viewState.value.message)
+        assertEquals(
+            RecipeListScreenViewState.Message.Type.NO_INTERNET,
+            viewModel.viewState.value.message?.type
+        )
     }
 
     @Test
@@ -203,7 +215,7 @@ class RecipeListScreenViewModelTest {
     }
 
     @Test
-    fun `fetchNextPage NoInternet shows error`() = runTest(testDispatcher) {
+    fun `fetchNextPage NoInternet shows toast error`() = runTest(testDispatcher) {
         coEvery {
             fetchNextRecipePageWhenNeededUseCase(any(), any(), any())
         } returns RecipePaginationResult.NoInternet
@@ -213,10 +225,10 @@ class RecipeListScreenViewModelTest {
         viewModel.getRecipeList(15)
         advanceUntilIdle()
 
-        assertNotNull(viewModel.viewState.value.message)
+        assertNull(viewModel.viewState.value.message)
         assertEquals(
-            RecipeListScreenViewState.Message.Type.NO_INTERNET,
-            viewModel.viewState.value.message?.type
+            dsR.string.toast_message_no_internet,
+            viewModel.viewState.value.toastMessage
         )
     }
 
@@ -275,7 +287,7 @@ class RecipeListScreenViewModelTest {
     }
 
     @Test
-    fun `search NoInternet shows no internet error`() = runTest(testDispatcher) {
+    fun `search NoInternet clears search results and shows no message error`() = runTest(testDispatcher) {
         coEvery {
             searchRecipeListUseCase(any(), any(), any(), any())
         } returns SearchRecipeResult.NoInternet
@@ -285,15 +297,12 @@ class RecipeListScreenViewModelTest {
         viewModel.onQueryChange("pasta")
         advanceUntilIdle()
 
-        assertNotNull(viewModel.viewState.value.message)
-        assertEquals(
-            RecipeListScreenViewState.Message.Type.NO_INTERNET,
-            viewModel.viewState.value.message?.type
-        )
+        assertNull(viewModel.viewState.value.message)
+        assertTrue(viewModel.viewState.value.searchBarViewState.recipesList.isEmpty())
     }
 
     @Test
-    fun `search Unknown shows generic error`() = runTest(testDispatcher) {
+    fun `search Unknown clears search results and shows no message error`() = runTest(testDispatcher) {
         coEvery {
             searchRecipeListUseCase(any(), any(), any(), any())
         } returns SearchRecipeResult.Unknown
@@ -303,11 +312,8 @@ class RecipeListScreenViewModelTest {
         viewModel.onQueryChange("cake")
         advanceUntilIdle()
 
-        assertNotNull(viewModel.viewState.value.message)
-        assertEquals(
-            RecipeListScreenViewState.Message.Type.GENERIC,
-            viewModel.viewState.value.message?.type
-        )
+        assertNull(viewModel.viewState.value.message)
+        assertTrue(viewModel.viewState.value.searchBarViewState.recipesList.isEmpty())
     }
 
     @Test
@@ -508,10 +514,13 @@ class RecipeListScreenViewModelTest {
     }
 
     @Test
-    fun `search bar has funnel enabled`() = runTest(testDispatcher) {
+    fun `connectivity turns off when flow emits false`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        assertTrue(viewModel.viewState.value.searchBarViewState.isFunnelEnabled)
+        connectivityFlow.value = false
+        advanceUntilIdle()
+
+        assertFalse(viewModel.viewState.value.hasInternetConnection)
     }
 }

@@ -1,6 +1,7 @@
 package com.spitzer.data.di
 
 import android.content.Context
+import android.net.ConnectivityManager
 import com.spitzer.data.BuildConfig
 import com.spitzer.data.remote.common.ApiCaller
 import com.spitzer.data.remote.common.ApiCallerImpl
@@ -37,6 +38,14 @@ class NetworkConfigurationModule {
         val baseUrl = BuildConfig.BASE_URL
         return ServiceFactoryImpl(httpClientFactory = clientFactory, baseUrl = baseUrl)
     }
+
+    @Provides
+    @Singleton
+    internal fun providesConnectivityManager(
+        @ApplicationContext applicationContext: Context
+    ): ConnectivityManager {
+        return applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    }
 }
 
 @Module
@@ -45,9 +54,9 @@ class ServicesModule {
     @Provides
     @Singleton
     internal fun providesConnectivityHandler(
-        @ApplicationContext applicationContext: Context,
+        connectivityManager: ConnectivityManager,
     ): ConnectivityHandler {
-        return ConnectivityHandlerImpl(applicationContext = applicationContext)
+        return ConnectivityHandlerImpl(connectivityManager = connectivityManager)
     }
 
     @Provides

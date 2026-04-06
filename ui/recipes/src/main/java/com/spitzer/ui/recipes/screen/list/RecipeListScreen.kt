@@ -1,23 +1,25 @@
 package com.spitzer.ui.recipes.screen.list
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import android.content.res.Configuration
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.spitzer.designsystem.animations.rememberDuration
@@ -25,17 +27,18 @@ import com.spitzer.designsystem.components.LoadingView
 import com.spitzer.designsystem.theme.CoolRecipesTheme
 import com.spitzer.designsystem.theme.Spacing
 import com.spitzer.designsystem.views.message.MessageView
+import com.spitzer.domain.model.recipe.Recipe
 import com.spitzer.domain.model.recipe.RecipeSearchCriteria
 import com.spitzer.domain.model.recipe.RecipeSortCriteria
 import com.spitzer.domain.model.recipe.RecipeSortOrder
 import com.spitzer.ui.recipes.screen.list.views.EmptySearchView
-import com.spitzer.ui.recipes.screen.list.views.RecipeListBottomSheetViewState
-import com.spitzer.ui.recipes.screen.list.views.RecipeListScreenSearchBarViewState
 import com.spitzer.ui.recipes.screen.list.views.RecipeListBottomSheetView
+import com.spitzer.ui.recipes.screen.list.views.RecipeListBottomSheetViewState
 import com.spitzer.ui.recipes.screen.list.views.RecipeListScreenSearchBarView
+import com.spitzer.ui.recipes.screen.list.views.RecipeListScreenSearchBarViewState
 import com.spitzer.ui.recipes.screen.list.views.RecipesCardListView
 import com.spitzer.ui.recipes.screen.list.views.mapCardListViewStates
-import com.spitzer.domain.model.recipe.Recipe
+import com.spitzer.designsystem.R as dsR
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,68 +98,89 @@ fun RecipeListScreen(
     )
     val showLoading = rememberDuration(value = viewState.isLoading, minDurationMillis = 700)
 
-    Box(
+    Column(
         modifier = modifier
-            .pullToRefresh(
-                isRefreshing = false,
-                state = state,
-                onRefresh = onRefresh
-            )
             .fillMaxSize()
             .background(CoolRecipesTheme.colors.n99n00)
     ) {
-        when {
-            showLoading -> LoadingView()
-            message != null -> MessageView(viewState = message)
-            else -> {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(Spacing.FOUR.dp),
-                ) {
-                    RecipeListScreenSearchBarView(
-                        modifier = Modifier.padding(horizontal = Spacing.FOUR.dp),
-                        viewState = viewState.searchBarViewState,
-                        onRecipeCardClicked = onRecipeCardClicked,
-                        onFunnelTap = onFunnelTap,
-                        onQueryChange = onQueryChange,
-                        onOpenSearch = onOpenSearch,
-                        onCloseSearch = onCloseSearch
-                    )
-
-                    if (viewState.recipeList.isNotEmpty()) {
-                        RecipesCardListView(
-                            cardListViewStates = mapCardListViewStates(
-                                recipeList = viewState.recipeList,
-                                onCardClicked = onRecipeCardClicked
-                            ),
-                            onPrefetchItemsAtIndex = onPrefetchItemsAtIndex
-                        )
-                    } else {
-                        EmptySearchView()
-                    }
-                }
+        if (!viewState.hasInternetConnection) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Red)
+                    .padding(vertical = Spacing.ONE.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(dsR.string.toast_message_no_internet),
+                    color = Color.White,
+                    style = CoolRecipesTheme.typography.caption2,
+                )
             }
         }
 
-        // We handle the refresh status with a custom animation
-        // The indicator is added to provide feedback to the user regarding
-        // the refresh action will occur when swiping down
-        PullToRefreshDefaults.Indicator(
-            modifier = Modifier.align(Alignment.TopCenter),
-            isRefreshing = false,
-            state = state
-        )
+        Box(
+            modifier = Modifier
+                .pullToRefresh(
+                    isRefreshing = false,
+                    state = state,
+                    onRefresh = onRefresh
+                )
+                .weight(1f)
+        ) {
+            when {
+                showLoading -> LoadingView()
+                message != null -> MessageView(viewState = message)
+                else -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(Spacing.FOUR.dp),
+                    ) {
+                        RecipeListScreenSearchBarView(
+                            modifier = Modifier.padding(horizontal = Spacing.FOUR.dp),
+                            viewState = viewState.searchBarViewState,
+                            onRecipeCardClicked = onRecipeCardClicked,
+                            onFunnelTap = onFunnelTap,
+                            onQueryChange = onQueryChange,
+                            onOpenSearch = onOpenSearch,
+                            onCloseSearch = onCloseSearch
+                        )
 
-        if (!viewState.bottomSheetViewState.shouldHide) {
-            RecipeListBottomSheetView(
-                viewState = viewState.bottomSheetViewState,
-                onSearchCriteriaSelected = onSearchCriteriaSelected,
-                onSortCriteriaSelected = onSortCriteriaSelected,
-                onSortOrderSelected = onSortOrderSelected,
-                onDismiss = onDismissBottomSheet,
-                onClear = onClear,
-                onConfirm = onConfirm
+                        if (viewState.recipeList.isNotEmpty()) {
+                            RecipesCardListView(
+                                cardListViewStates = mapCardListViewStates(
+                                    recipeList = viewState.recipeList,
+                                    onCardClicked = onRecipeCardClicked
+                                ),
+                                onPrefetchItemsAtIndex = onPrefetchItemsAtIndex
+                            )
+                        } else {
+                            EmptySearchView()
+                        }
+                    }
+                }
+            }
+
+            // We handle the refresh status with a custom animation
+            // The indicator is added to provide feedback to the user regarding
+            // the refresh action will occur when swiping down
+            PullToRefreshDefaults.Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = false,
+                state = state
             )
+
+            if (!viewState.bottomSheetViewState.shouldHide) {
+                RecipeListBottomSheetView(
+                    viewState = viewState.bottomSheetViewState,
+                    onSearchCriteriaSelected = onSearchCriteriaSelected,
+                    onSortCriteriaSelected = onSortCriteriaSelected,
+                    onSortOrderSelected = onSortOrderSelected,
+                    onDismiss = onDismissBottomSheet,
+                    onClear = onClear,
+                    onConfirm = onConfirm
+                )
+            }
         }
     }
 }

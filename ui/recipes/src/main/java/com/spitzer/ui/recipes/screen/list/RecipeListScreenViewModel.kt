@@ -8,6 +8,7 @@ import com.spitzer.domain.model.recipe.RecipePage
 import com.spitzer.domain.model.recipe.RecipeSearchCriteria
 import com.spitzer.domain.model.recipe.RecipeSortCriteria
 import com.spitzer.domain.model.recipe.RecipeSortOrder
+import com.spitzer.domain.usecase.connectivity.ObserveConnectivityUseCase
 import com.spitzer.domain.usecase.recipe.FetchNextRecipePageWhenNeededUseCase
 import com.spitzer.domain.usecase.recipe.GetRecipeListUseCase
 import com.spitzer.domain.usecase.recipe.RefreshRecipeListUseCase
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.spitzer.designsystem.R as dsR
 
 sealed class RecipeListScreenViewModelOutput {
     data class RecipeDetail(val recipeId: Long) : RecipeListScreenViewModelOutput()
@@ -36,7 +38,8 @@ class RecipeListScreenViewModel @Inject constructor(
     private val getRecipeListUseCase: GetRecipeListUseCase,
     private val refreshRecipeListUseCase: RefreshRecipeListUseCase,
     private val fetchNextRecipePageWhenNeededUseCase: FetchNextRecipePageWhenNeededUseCase,
-    private val searchRecipeListUseCase: SearchRecipePageUseCase
+    private val searchRecipeListUseCase: SearchRecipePageUseCase,
+    private val observeConnectivityUseCase: ObserveConnectivityUseCase
 ) : ViewModel() {
 
     // Variables that allow handling logic to skip updates when the search criteria doesn't change
@@ -50,36 +53,33 @@ class RecipeListScreenViewModel @Inject constructor(
 
     lateinit var output: (RecipeListScreenViewModelOutput) -> Unit
 
-    private val _viewState by lazy {
-        MutableStateFlow(
-            RecipeListScreenViewState(
-                recipeList = emptyList(),
-                isLoading = true,
-                searchBarViewState = RecipeListScreenSearchBarViewState(
-                    isSearchActive = false,
-                    isLoading = false,
-                    query = "",
-                    isFunnelOn = false,
-                    isFunnelEnabled = true,
-                    searchCriteria = lastSearchCriteria,
-                    recipesList = emptyList()
-                ),
-                bottomSheetViewState = RecipeListBottomSheetViewState(
-                    selectedSearchCriteria = lastSearchCriteria,
-                    selectedSortOrder = lastSortOrder,
-                    selectedSortCriteria = lastSortCriteria,
-                    searchCriteriaList = RecipeSearchCriteria.entries,
-                    sortCriteriaList = RecipeSortCriteria.entries,
-                    sortOrderList = RecipeSortOrder.entries,
-                    shouldHide = true
-                ),
-                message = null
-            )
+    private val _viewState = MutableStateFlow(
+        RecipeListScreenViewState(
+            recipeList = emptyList(),
+            isLoading = false,
+            searchBarViewState = RecipeListScreenSearchBarViewState(
+                isSearchActive = false,
+                isLoading = false,
+                query = "",
+                isFunnelOn = false,
+                isFunnelEnabled = true,
+                searchCriteria = lastSearchCriteria,
+                recipesList = emptyList()
+            ),
+            bottomSheetViewState = RecipeListBottomSheetViewState(
+                selectedSearchCriteria = lastSearchCriteria,
+                selectedSortOrder = lastSortOrder,
+                selectedSortCriteria = lastSortCriteria,
+                searchCriteriaList = RecipeSearchCriteria.entries,
+                sortCriteriaList = RecipeSortCriteria.entries,
+                sortOrderList = RecipeSortOrder.entries,
+                shouldHide = true
+            ),
+            message = null
         )
-    }
-    val viewState: StateFlow<RecipeListScreenViewState> by lazy {
-        _viewState.asStateFlow()
-    }
+    )
+
+    val viewState: StateFlow<RecipeListScreenViewState> = _viewState.asStateFlow()
 
     private var retryJob: Job? = null
     private var searchJob: Job? = null
@@ -91,7 +91,16 @@ class RecipeListScreenViewModel @Inject constructor(
             }
         }
 
-        refreshRecipeList()
+        viewModelScope.launch {
+            observeConnectivityUseCase().collectLatest { hasInternetConnection ->
+                _viewState.update { currentState ->
+                    currentState.copy(
+                        hasInternetConnection = hasInternetConnection
+                    )
+                }
+            }
+        }
+        getRecipeList(0)
     }
 
     /**
@@ -305,20 +314,15 @@ class RecipeListScreenViewModel @Inject constructor(
                     sortOrder = _viewState.value.bottomSheetViewState.selectedSortOrder
                 )
                 when (result) {
-                    SearchRecipeResult.NoInternet -> {
-                        showNoInternetConnectionError(
-                            retryAction = {
-                                searchRecipeList()
-                            }
-                        )
-                    }
-
+                    SearchRecipeResult.NoInternet,
                     SearchRecipeResult.Unknown -> {
-                        showGenericError(
-                            retryAction = {
-                                searchRecipeList()
-                            }
-                        )
+                        _viewState.update { currentState ->
+                            currentState.copy(
+                                searchBarViewState = currentState.searchBarViewState.copy(
+                                    recipesList = emptyList()
+                                )
+                            )
+                        }
                     }
 
                     is SearchRecipeResult.Success -> {
@@ -374,23 +378,19 @@ class RecipeListScreenViewModel @Inject constructor(
                 RecipePaginationResult.Unknown,
                 RecipePaginationResult.WrongIndex,
                 RecipePaginationResult.Empty -> {
-                    if (_viewState.value.recipeList.isEmpty()) {
-                        showGenericError(
-                            retryAction = {
-                                refreshRecipeList()
-                            }
-                        )
-                    }
+                    showGenericError(
+                        retryAction = {
+                            refreshRecipeList()
+                        }
+                    )
                 }
 
                 RecipePaginationResult.NoInternet -> {
-                    if (_viewState.value.recipeList.isEmpty()) {
-                        showNoInternetConnectionError(
-                            retryAction = {
-                                refreshRecipeList()
-                            }
-                        )
-                    }
+                    showNoInternetConnectionError(
+                        retryAction = {
+                            refreshRecipeList()
+                        }
+                    )
                 }
 
                 RecipePaginationResult.Success -> {
@@ -420,14 +420,13 @@ class RecipeListScreenViewModel @Inject constructor(
             )
             when (result) {
                 RecipePaginationResult.NoInternet -> {
-                    showNoInternetConnectionError(
-                        retryAction = {
-                            handleRetryError(elementIndex)
-                        }
-                    )
+                    showToastError(dsR.string.toast_message_no_internet)
                 }
 
-                RecipePaginationResult.Unknown,
+                RecipePaginationResult.Unknown -> {
+                    showToastError(dsR.string.toast_message_generic_error)
+                }
+
                 RecipePaginationResult.WrongIndex,
                 RecipePaginationResult.Empty,
                 RecipePaginationResult.Success -> {
@@ -525,6 +524,20 @@ class RecipeListScreenViewModel @Inject constructor(
             currentState.copy(
                 message = null
             )
+        }
+    }
+
+    private fun showToastError(messageResId: Int) {
+        _viewState.update { currentState ->
+            currentState.copy(
+                toastMessage = messageResId
+            )
+        }
+    }
+
+    fun onToastMessageShown() {
+        _viewState.update { currentState ->
+            currentState.copy(toastMessage = null)
         }
     }
 }
