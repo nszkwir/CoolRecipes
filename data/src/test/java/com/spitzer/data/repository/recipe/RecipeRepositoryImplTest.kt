@@ -40,7 +40,7 @@ class RecipeRepositoryImplTest {
     private val recipesDao: RecipesDao = mockk(relaxed = true)
     private val recipeDetailsDao: RecipeDetailsDao = mockk(relaxed = true)
     private val favoriteRecipeDao: FavoriteRecipeDao = mockk(relaxed = true)
-    private val recipePreferences: RecipeSharedPreferences = mockk()
+    private val recipePreferences: RecipeSharedPreferences = mockk(relaxed = true)
     private val testDispatcher = StandardTestDispatcher()
 
     private lateinit var repository: RecipeRepositoryImpl

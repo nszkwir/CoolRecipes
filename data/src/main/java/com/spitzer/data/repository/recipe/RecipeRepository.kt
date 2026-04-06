@@ -20,8 +20,8 @@ import com.spitzer.data.repository.recipe.mapper.RecipeMapper.mapFromStoredRecip
 import com.spitzer.data.repository.recipe.mapper.RecipeMapper.mapSortCriteria
 import com.spitzer.data.repository.recipe.mapper.RecipeMapper.mapSortOrder
 import com.spitzer.data.repository.recipe.mapper.RecipeMapper.mapToStoredRecipes
-import com.spitzer.domain.model.pagination.PaginationResult
 import com.spitzer.domain.model.pagination.IndexPaginator
+import com.spitzer.domain.model.pagination.PaginationResult
 import com.spitzer.domain.model.recipe.Recipe
 import com.spitzer.domain.model.recipe.RecipePage
 import com.spitzer.domain.model.recipe.RecipeSearchCriteria
@@ -33,7 +33,9 @@ import com.spitzer.domain.usecase.recipe.result.RecipePaginationResult
 import com.spitzer.domain.usecase.recipe.result.SearchRecipeResult
 import com.spitzer.domain.usecase.recipedetails.result.RecipeDetailsResult
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -90,38 +92,39 @@ class RecipeRepositoryImpl @Inject constructor(
             list.map { it.id }.toSet()
         }
 
-    override suspend fun initialize() = withContext(ioDispatcher) {
-        try {
-            val recipes = recipesDao.get().map {
-                mapFromStoredRecipe(it)
+    override suspend fun initialize() {
+        withContext(ioDispatcher) {
+            try {
+                val recipes = recipesDao.get().map {
+                    mapFromStoredRecipe(it)
+                }
+
+                val totalResults = recipePreferences.getRecipeListTotalResults()
+
+                // Allocation of the recipe list to allow infinite scrolling
+                val recipeList: MutableList<Recipe?> =
+                    MutableList(totalResults) { null }
+
+                recipes.forEachIndexed { index, recipe ->
+                    recipeList[index] = recipe
+                }
+
+                _recipePage.value = RecipePage(
+                    list = recipeList,
+                    totalResults = totalResults
+                )
+            } catch (_: Exception) {
+                initializeEmptyRecipes()
             }
-
-            val totalResults = recipePreferences.getRecipeListTotalResults()
-
-            // Allocation of the recipe list to allow infinite scrolling
-            val recipeList: MutableList<Recipe?> =
-                MutableList(totalResults) { null }
-
-            recipes.forEachIndexed { index, recipe ->
-                recipeList[index] = recipe
-            }
-
-            _recipePage.value = RecipePage(
-                list = recipeList,
-                totalResults = totalResults
-            )
-
-        } catch (_: Exception) {
-            initializeEmptyRecipes()
         }
     }
-
 
     private fun initializeEmptyRecipes() {
         _recipePage.value = RecipePage(
             list = mutableListOf(),
             totalResults = 0
         )
+        recipePreferences.updateRecipeListTotalResults(0)
     }
 
     /**
@@ -161,7 +164,10 @@ class RecipeRepositoryImpl @Inject constructor(
         currentSortCriteria = sortCriteria
         currentSortOrder = sortOrder
         val result = recipePaginator.refresh()
-        syncPaginatorState()
+        when (result) {
+            is PaginationResult.Success -> syncPaginatorState()
+            else -> Unit
+        }
         return mapPaginationResult(result)
     }
 
@@ -176,7 +182,10 @@ class RecipeRepositoryImpl @Inject constructor(
         currentSortCriteria = sortCriteria
         currentSortOrder = sortOrder
         val result = recipePaginator.loadNextPage(elementIndex)
-        syncPaginatorState()
+        when (result) {
+            is PaginationResult.Success -> syncPaginatorState()
+            else -> Unit
+        }
         return mapPaginationResult(result)
     }
 
@@ -185,7 +194,7 @@ class RecipeRepositoryImpl @Inject constructor(
      */
     private fun syncPaginatorState() {
         val paginatedData = recipePaginator.data.value
-
+        recipePreferences.updateRecipeListTotalResults(paginatedData.totalItems)
         _recipePage.update {
             RecipePage(
                 list = paginatedData.items,

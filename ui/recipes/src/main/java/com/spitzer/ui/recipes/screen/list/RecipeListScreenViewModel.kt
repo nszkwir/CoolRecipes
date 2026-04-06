@@ -100,7 +100,6 @@ class RecipeListScreenViewModel @Inject constructor(
                 }
             }
         }
-        getRecipeList(0)
     }
 
     /**
